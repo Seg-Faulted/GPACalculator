@@ -1,0 +1,25 @@
+import time
+
+print("GPA Calculator")
+time.sleep(1)
+num_classes = int(input("Enter number of Classes: "))
+grades_input = input("Enter Grades out of 100 (NO DECIMALS): ")
+my_list = grades_input.split(",")
+
+def calculate_gpa(grades):
+  total = sum(grades)
+  gpa = total / len(grades)
+  return gpa
+
+# Calculate the GPA using the user's input
+gpa = calculate_gpa([int(grade) for grade in my_list])
+
+print("Your GPA is:", gpa)
+
+# Print an appropriate message based on the GPA
+if gpa >= 90:
+  print("Amazing")
+elif gpa >= 80:
+  print("Nice")
+else:
+  print("Needs work")
