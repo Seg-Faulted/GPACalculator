@@ -1,0 +1,152 @@
+/* Made With Qt Design Studio */ 
+
+#include <chrono>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <thread>
+#include <vector>
+
+using namespace std;
+
+void sleep(int seconds) { this_thread::sleep_for(chrono::seconds(seconds)); }
+
+double calculateGPA(const vector<int> &grades) {
+  int total = 0;
+  for (int grade : grades) {
+    total += grade;
+  }
+  double gpa = static_cast<double>(total) / grades.size();
+  return gpa;
+}
+
+int main() {
+  cout << "GPA Calculator" << endl;
+  sleep(1);
+
+  int numClasses;
+  cout << "Enter number of Classes: ";
+  cin >> numClasses;
+
+  string gradesInput;
+  cout << "Enter Grades out of 100 (NO DECIMALS): ";
+  cin.ignore(); // Clear the newline character from the input buffer
+  getline(cin, gradesInput);
+
+  vector<int> grades;
+  stringstream ss(gradesInput);
+  int grade;
+  while (ss >> grade) {
+    grades.push_back(grade);
+    if (ss.peek() == ',')
+      ss.ignore();
+  }
+
+  double gpa = calculateGPA(grades);
+
+  cout << "Your GPA is: " << gpa << endl;
+
+  if (gpa >= 90) {
+    cout << "Amazing" << endl;
+  } else if (gpa >= 80) {
+    cout << "Nice" << endl;
+  } else {
+    cout << "Needs work" << endl;
+  }
+
+  return 0;
+}
+#include <QGuiApplication>
+#include <QList>
+#include <QMutex>
+#include <QObject>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QString>
+#include <QThread>
+#include <chrono>
+#include <thread>
+
+class Calculator : public QObject {
+  Q_OBJECT
+
+public:
+  Calculator() {}
+
+public slots:
+  double calculateGPA(const QString &numClasses, const QString &gradesInput) {
+    int num = numClasses.toInt();
+    QStringList grades = gradesInput.split(",");
+
+    if (grades.size() != num) {
+      return 0.0; // Handle error
+    }
+
+    int total = 0;
+    for (const QString &grade : grades) {
+      total += grade.toInt();
+    }
+
+    return static_cast<double>(total) / num;
+  }
+};
+
+int main(int argc, char *argv[]) {
+  QGuiApplication app(argc, argv);
+
+  QQmlApplicationEngine engine;
+
+  Calculator calculator;
+  engine.rootContext()->setContextProperty("Calculator", &calculator);
+
+  const QString qmlSource = R"(
+        import QtQuick 2.15
+        import QtQuick.Controls 2.15
+
+        ApplicationWindow {
+            visible: true
+            width: 400
+            height: 300
+            title: "GPA Calculator"
+
+            Rectangle {
+                width: parent.width
+                height: parent.height
+
+                Column {
+                    anchors.centerIn: parent
+
+                    Text {
+                        text: "GPA Calculator"
+                        font.pixelSize: 22
+                    }
+
+                    TextField {
+                        id: numClassesInput
+                        placeholderText: "# Of Classes"
+                    }
+
+                    TextField {
+                        id: gradesInput
+                        placeholderText: "Enter Grades (eg: 90, 87, 95) must be followed by comma"
+                    }
+
+                    Button {
+                        text: "Calculate GPA"
+                        onClicked: {
+                            var numClasses = numClassesInput.text;
+                            var grades = gradesInput.text;
+                            var gpa = Calculator.calculateGPA(numClasses, grades);
+                            console.log("Your GPA is:", gpa);
+                        }
+                    }
+                }
+            }
+        }
+    )";
+
+  engine.loadData(QByteArray(qmlSource.toUtf8()), QUrl());
+  return app.exec();
+}
+
+#include "main.moc"
